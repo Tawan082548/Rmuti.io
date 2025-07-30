@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>แบบฟอร์มเบิกเงิน</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #e0f7fa);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0 18px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      border: none;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #388e3c;
+    }
+    .nav-link {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      font-weight: bold;
+      color: #1976D2;
+      text-decoration: none;
+    }
+    .nav-link:hover {
+      text-decoration: underline;
+    }
+    .success-box {
+      text-align: center;
+      color: #2e7d32;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .success-box h1 {
+      font-size: 28px;
+    }
+    .success-box p {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="form-container">
+      <h2>แบบฟอร์มเบิกเงิน</h2>
+      <form id="moneyForm">
+        <input type="text" name="student_id" placeholder="รหัสนักศึกษา" required pattern="\d{6,20}" title="กรอกรหัสนักศึกษาเป็นตัวเลขอย่างน้อย 6 หลัก" />
+        <input type="text" name="name" placeholder="ชื่อ-นามสกุล" required />
+        <input type="number" name="amount" placeholder="จำนวนเงิน (บาท)" required />
+        <select name="bank" required>
+          <option value="">เลือกธนาคาร</option>
+          <option value="กรุงไทย">กรุงไทย</option>
+          <option value="กสิกรไทย">กสิกรไทย</option>
+          <option value="ไทยพาณิชย์">ไทยพาณิชย์</option>
+          <option value="ออมสิน">ออมสิน</option>
+          <option value="อื่นๆ">อื่นๆ</option>
+        </select>
+        <input type="text" name="account_number" placeholder="เลขบัญชี" required pattern="\d{6,20}" title="กรุณากรอกเลขบัญชีเป็นตัวเลขอย่างน้อย 6 หลัก" />
+        <textarea name="note" placeholder="หมายเหตุเพิ่มเติม (ถ้ามี)"></textarea>
+        <button type="submit">ส่งข้อมูล</button>
+      </form>
+    </div>
+
+    <div id="success-message" class="success-box" style="display:none;">
+      <h1>✅ ส่งข้อมูลสำเร็จ!</h1>
+      <p>ขอบคุณสำหรับการส่งข้อมูล<br>เราจะดำเนินการให้เร็วที่สุด</p>
+      <a href="print-form.html" class="nav-link">📄 ดูแบบฟอร์มราชการ (PDF)</a>
+    </div>
+
+    <a href="history.html" class="nav-link">📜 ดูประวัติการเบิกเงิน</a>
+    <div id="adminLinkContainer"></div>
+  </div>
+
+<script>
+  const form = document.getElementById('moneyForm');
+  const formContainer = document.getElementById('form-container');
+  const successBox = document.getElementById('success-message');
+  const adminLinkContainer = document.getElementById('adminLinkContainer');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const entry = {
+      student_id: formData.get('student_id'),
+      name: formData.get('name'),
+      amount: formData.get('amount'),
+      bank: formData.get('bank'),
+      account_number: formData.get('account_number'),
+      note: formData.get('note'),
+      date: new Date().toLocaleDateString('th-TH')
+    };
+
+    // บันทึกลง localStorage
+    let history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
+    history.push(entry);
+    localStorage.setItem('withdrawHistory', JSON.stringify(history));
+
+    localStorage.setItem('lastSubmit', JSON.stringify(entry));
+
+    // แสดงผลลัพธ์
+    formContainer.style.display = 'none';
+    successBox.style.display = 'block';
+    form.reset();
+  });
+
+  // ตรวจสอบว่าเข้าสู่ระบบแล้วหรือไม่
+  if(localStorage.getItem('isLoggedIn') !== 'true') {
+    alert('กรุณาเข้าสู่ระบบก่อนใช้งาน');
+    window.location.href = 'login.html';
+  }
+
+  // ตรวจสอบว่าเป็นแอดมินหรือไม่ แล้วแสดงปุ่ม
+  const loggedInUser = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
+  if (loggedInUser.email === 'bunchoom2279@gmail.com') {
+    const adminBtn = document.createElement('a');
+    adminBtn.href = 'admin.html';
+    adminBtn.textContent = '🔐 เข้าสู่หน้าแอดมิน';
+    adminBtn.className = 'nav-link';
+    adminLinkContainer.appendChild(adminBtn);
+  }
+</script>
+</body>
+</html>

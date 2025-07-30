@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>ฟอร์มเบิกเงิน (PDF)</title>
+  <style>
+    body {
+      font-family: 'TH SarabunPSK', sans-serif;
+      padding: 50px;
+      line-height: 1.8;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: center;
+    }
+    .btn-print, .btn-back {
+      display: inline-block;
+      margin: 30px 10px 30px 10px;
+      padding: 12px 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: center;
+      text-decoration: none;
+    }
+    .btn-print:hover, .btn-back:hover {
+      background-color: #388e3c;
+    }
+    @media print {
+      .btn-print, .btn-back { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <button class="btn-print" onclick="window.print()">🖨️ พิมพ์ฟอร์ม PDF</button>
+  <button class="btn-back" onclick="window.history.back()">🔙 กลับหน้าแบบฟอร์ม</button>
+
+  <h2 style="text-align:center;">ฟอร์มเบิกเงิน</h2>
+  <p>ชื่อ: <span id="name"></span></p>
+  <p>รหัสนักศึกษา: <span id="student_id"></span></p>
+  <p>วันที่: <span id="date"></span></p>
+  <p>ธนาคาร: <span id="bank"></span></p>
+  <p>เลขบัญชี: <span id="account_number"></span></p>
+  <p>หมายเหตุ: <span id="note"></span></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ลำดับ</th>
+        <th>รายการ</th>
+        <th>หลักฐาน</th>
+        <th>จำนวนเงิน (บาท)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>ขอเบิกเงิน</td>
+        <td>แนบใบเสร็จ</td>
+        <td id="amount"></td>
+      </tr>
+      <tr>
+        <td colspan="3">รวม</td>
+        <td id="total"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br><br>
+  <p>ลงชื่อ.......................................... ผู้ขอเบิก</p>
+  <p>ลงชื่อ.......................................... ผู้ตรวจสอบ</p>
+  <p>ลงชื่อ.......................................... ผู้อนุมัติ</p>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("lastSubmit") || "{}");
+    document.getElementById("name").textContent = data.name || "-";
+    document.getElementById("student_id").textContent = data.student_id || "-";
+    document.getElementById("date").textContent = data.date || "-";
+    document.getElementById("bank").textContent = data.bank || "-";
+    document.getElementById("account_number").textContent = data.account_number || "-";
+    document.getElementById("note").textContent = data.note || "-";
+    document.getElementById("amount").textContent = data.amount || "0.00";
+    document.getElementById("total").textContent = data.amount || "0.00";
+  </script>
+</body>
+</html>

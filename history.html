@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>ประวัติการเบิกเงิน</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  th {
+    background-color: #2196F3;
+    color: white;
+  }
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .btn-delete {
+    background-color: #e53935;
+    color: white;
+  }
+  .btn-delete:hover {
+    background-color: #b71c1c;
+  }
+  .btn-print {
+    background-color: #4CAF50;
+    color: white;
+  }
+  .btn-print:hover {
+    background-color: #388e3c;
+  }
+  .nav-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #2196F3;
+    font-weight: bold;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>ประวัติการเบิกเงิน</h2>
+    <table id="historyTable">
+      <thead>
+        <tr>
+          <th>ลำดับ</th>
+          <th>ชื่อ-นามสกุล</th>
+          <th>รหัสนักศึกษา</th>
+          <th>จำนวนเงิน (บาท)</th>
+          <th>วันที่</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- รายการจะถูกเพิ่มที่นี่ -->
+      </tbody>
+    </table>
+    <a href="index.html" class="nav-link">🔙 กลับหน้าแบบฟอร์ม</a>
+  </div>
+
+<script>
+  const historyTableBody = document.querySelector('#historyTable tbody');
+
+  function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
+    historyTableBody.innerHTML = '';
+
+    if(history.length === 0) {
+      historyTableBody.innerHTML = '<tr><td colspan="6">ยังไม่มีประวัติการเบิกเงิน</td></tr>';
+      return;
+    }
+
+    history.forEach((item, index) => {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${item.name}</td>
+        <td>${item.student_id}</td>
+        <td>${parseFloat(item.amount).toFixed(2)}</td>
+        <td>${item.date}</td>
+        <td>
+          <button class="btn-print" onclick="printItem(${index})">🖨️ พิมพ์</button>
+          <button class="btn-delete" onclick="deleteItem(${index})">❌ ลบ</button>
+        </td>
+      `;
+
+      historyTableBody.appendChild(tr);
+    });
+  }
+
+  function printItem(index) {
+    const history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
+    if(!history[index]) return alert('ไม่พบข้อมูล');
+
+    localStorage.setItem('lastSubmit', JSON.stringify(history[index]));
+    window.open('print-form.html', '_blank');
+  }
+
+  function deleteItem(index) {
+    if(!confirm('คุณต้องการลบรายการนี้หรือไม่?')) return;
+
+    let history = JSON.parse(localStorage.getItem('withdrawHistory') || '[]');
+    history.splice(index, 1);
+    localStorage.setItem('withdrawHistory', JSON.stringify(history));
+    loadHistory();
+  }
+
+  // เช็คล็อกอินก่อนเข้า
+  if(localStorage.getItem('isLoggedIn') !== 'true') {
+    alert('กรุณาเข้าสู่ระบบก่อนใช้งาน');
+    window.location.href = 'login.html';
+  } else {
+    loadHistory();
+  }
+</script>
+</body>
+</html>

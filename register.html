@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>สมัครสมาชิก</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #f0f4f8, #e0f7fa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .register-container {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    width: 100%;
+    max-width: 400px;
+  }
+  h2 { text-align: center; color: #333; margin-bottom: 25px; }
+  input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  button:hover { background-color: #1976D2; }
+  .login-link { text-align: center; margin-top: 15px; }
+  .error { color: red; font-size: 0.9rem; }
+  .success { color: green; font-size: 0.9rem; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+  <div class="register-container">
+    <h2>สมัครสมาชิก</h2>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="ชื่อ-นามสกุล" required />
+      <input type="text" id="studentId" placeholder="รหัสนักศึกษา" required pattern="\d{8}" title="กรุณากรอกรหัสนักศึกษา 8 หลัก" />
+      <input type="email" id="email" placeholder="อีเมล" required />
+      <input type="password" id="password" placeholder="รหัสผ่าน" required minlength="6" />
+      <input type="password" id="confirmPassword" placeholder="ยืนยันรหัสผ่าน" required minlength="6" />
+      <p id="errorMsg" class="error"></p>
+      <p id="successMsg" class="success"></p>
+      <button type="submit">สมัครสมาชิก</button>
+    </form>
+    <div class="login-link">
+      <a href="login.html">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</a>
+    </div>
+  </div>
+
+  <script>
+    const registerForm = document.getElementById('registerForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+
+    registerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+
+      const name = document.getElementById('name').value.trim();
+      const studentId = document.getElementById('studentId').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      const studentIdRegex = /^\d{8}$/;
+      if (!studentIdRegex.test(studentId)) {
+        errorMsg.textContent = 'กรุณากรอกรหัสนักศึกษาให้ถูกต้อง 8 หลัก';
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'รหัสผ่านไม่ตรงกัน';
+        return;
+      }
+
+      // ดึง users จาก localStorage หรือสร้างใหม่ถ้าไม่มี
+      let users = JSON.parse(localStorage.getItem('users')) || [];
+
+      // เช็คอีเมลซ้ำ
+      if (users.some(user => user.email === email)) {
+        errorMsg.textContent = 'อีเมลนี้ถูกใช้งานแล้ว';
+        return;
+      }
+
+      // สร้าง user object ใหม่
+      const user = { name, studentId, email, password };
+
+      // เพิ่ม user ใหม่เข้า users array
+      users.push(user);
+
+      // บันทึก users กลับ localStorage
+      localStorage.setItem('users', JSON.stringify(users));
+
+      successMsg.textContent = 'สมัครสมาชิกสำเร็จ! กำลังพาไปหน้าเข้าสู่ระบบ...';
+
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

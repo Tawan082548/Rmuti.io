@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<title>แก้ไขข้อมูลผู้ใช้ (Admin)</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+  }
+  .edit-container {
+    max-width: 900px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  button.back-button {
+    background-color: #1976D2;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+  }
+  button.back-button:hover {
+    background-color: #0d47a1;
+  }
+  form {
+    margin-bottom: 30px;
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin: 15px 0 5px;
+  }
+  input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  button.saveBtn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  button.saveBtn:hover {
+    background-color: #388e3c;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    table-layout: fixed;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 12px;
+    text-align: left;
+    word-wrap: break-word;
+    vertical-align: middle;
+  }
+  td input {
+    width: 100%;
+    padding: 8px;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    box-sizing: border-box;
+  }
+  .error, .success {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 1rem;
+  }
+  .error { color: red; }
+  .success { color: green; }
+
+  /* ปุ่มดู/ซ่อนรหัสผ่าน */
+  .togglePwdBtn {
+    margin-top: 8px;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .togglePwdBtn:hover {
+    background-color: #1976D2;
+  }
+
+  /* Modal for admin login */
+  #adminLoginModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #adminLoginModal .modal-content {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    width: 320px;
+  }
+  #adminLoginModal h3 {
+    margin-top: 0;
+    text-align: center;
+  }
+  #adminLoginModal input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  #adminLoginModal button {
+    width: 100%;
+    margin-top: 20px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    
+    padding: 8px 0;       /* สูงขึ้น */
+    font-size: 1.2rem;     /* ขนาดตัวหนังสือใหญ่ขึ้น */
+  }
+  #adminLoginModal button:hover {
+    background-color: #1976D2;
+  }
+</style>
+</head>
+<body>
+
+<!-- Modal login รหัสแอดมิน -->
+<div id="adminLoginModal">
+  <div class="modal-content">
+    <h3>กรุณาใส่รหัสแอดมิน</h3>
+    <input type="password" id="adminPasswordInput" placeholder="รหัสแอดมิน" autofocus />
+    <button id="adminLoginBtn">เข้าสู่ระบบ</button>
+    <p id="loginError" class="error"></p>
+  </div>
+</div>
+
+<!-- หน้าแก้ไขข้อมูลผู้ใช้ -->
+<div class="edit-container" style="display:none;" id="editSection">
+  <button id="backBtn" class="back-button">← กลับ</button>
+  
+  <h2>แก้ไขข้อมูลผู้ใช้</h2>
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <th>ชื่อ-นามสกุล</th>
+        <th>รหัสนักศึกษา</th>
+        <th>อีเมล</th>
+        <th>รหัสผ่าน</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- ข้อมูลผู้ใช้จะแสดงที่นี่ -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const adminPassword = "admin0408";
+
+  const adminLoginModal = document.getElementById('adminLoginModal');
+  const adminPasswordInput = document.getElementById('adminPasswordInput');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const loginError = document.getElementById('loginError');
+  const editSection = document.getElementById('editSection');
+  const usersTableBody = document.querySelector('#usersTable tbody');
+  const backBtn = document.getElementById('backBtn');
+
+  adminLoginBtn.addEventListener('click', () => {
+    const pass = adminPasswordInput.value.trim();
+    if(pass === adminPassword) {
+      loginError.textContent = '';
+      adminLoginModal.style.display = 'none';
+      editSection.style.display = 'block';
+      loadUsers();
+    } else {
+      loginError.textContent = 'รหัสแอดมินไม่ถูกต้อง';
+    }
+  });
+
+  adminPasswordInput.addEventListener('keypress', e => {
+    if(e.key === 'Enter') {
+      adminLoginBtn.click();
+    }
+  });
+
+  backBtn.addEventListener('click', () => {
+    history.back();
+  });
+
+  // โหลดข้อมูลผู้ใช้จาก localStorage มาแสดง
+  function loadUsers() {
+    usersTableBody.innerHTML = '';
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    users.forEach((user, index) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" value="${user.name}" data-index="${index}" data-field="name" /></td>
+        <td><input type="text" value="${user.studentId}" data-index="${index}" data-field="studentId" pattern="\\d{8}" title="รหัสนักศึกษาต้องเป็นตัวเลข 8 หลัก" /></td>
+        <td><input type="email" value="${user.email}" data-index="${index}" data-field="email" /></td>
+        <td>
+          <input type="password" value="${user.password}" data-index="${index}" data-field="password" id="pwd-${index}" />
+          <button type="button" class="togglePwdBtn" data-index="${index}">👁️</button>
+        </td>
+        <td><button data-index="${index}" class="saveBtn">บันทึก</button></td>
+      `;
+      usersTableBody.appendChild(tr);
+    });
+
+    addTogglePasswordListeners();
+
+    // ผูก event ให้ปุ่มบันทึกแต่ละแถว
+    document.querySelectorAll('.saveBtn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const idx = e.target.getAttribute('data-index');
+        saveUser(idx);
+      });
+    });
+  }
+
+  // ฟังก์ชันบันทึกข้อมูลผู้ใช้
+  function saveUser(index) {
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    // หา input ของแถวที่แก้ไข
+    const inputs = usersTableBody.querySelectorAll(`input[data-index="${index}"]`);
+    let updatedUser = {};
+
+    inputs.forEach(input => {
+      updatedUser[input.dataset.field] = input.value.trim();
+    });
+
+    // ตรวจสอบความถูกต้องรหัสนักศึกษา
+    const studentIdPattern = /^\d{8}$/;
+    if(!studentIdPattern.test(updatedUser.studentId)) {
+      alert('รหัสนักศึกษาต้องเป็นตัวเลข 8 หลัก');
+      return;
+    }
+
+    // ตรวจสอบอีเมลไม่ซ้ำกับคนอื่น (ยกเว้นตัวเอง)
+    for(let i=0; i<users.length; i++) {
+      if(i != index && users[i].email === updatedUser.email) {
+        alert('อีเมลนี้ถูกใช้งานแล้ว');
+        return;
+      }
+    }
+
+    // อัพเดต user ใน array
+    users[index] = updatedUser;
+    localStorage.setItem('users', JSON.stringify(users));
+    alert('บันทึกข้อมูลสำเร็จ');
+    loadUsers();
+  }
+
+  // ฟังก์ชันเพิ่ม event ให้ปุ่มดู/ซ่อนรหัสผ่าน
+  function addTogglePasswordListeners() {
+    document.querySelectorAll('.togglePwdBtn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const index = btn.getAttribute('data-index');
+        const pwdInput = document.getElementById(`pwd-${index}`);
+        if (pwdInput.type === 'password') {
+          pwdInput.type = 'text';
+          btn.textContent = '🙈';
+        } else {
+          pwdInput.type = 'password';
+          btn.textContent = '👁️';
+        }
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
