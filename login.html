@@ -60,33 +60,46 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnvWH-_TpJmJ23e-PIKyKFmyIlNWEhOBc",
+      authDomain: "fir-rmuti-86c23.firebaseapp.com",
+      projectId: "fir-rmuti-86c23",
+      storageBucket: "fir-rmuti-86c23.firebasestorage.app",
+      messagingSenderId: "422230695877",
+      appId: "1:422230695877:web:67ba59ccf148d5463f35ac"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
     const loginForm = document.getElementById('loginForm');
     const errorMsg = document.getElementById('errorMsg');
 
-    loginForm.addEventListener('submit', function(e) {
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      errorMsg.textContent = "";
 
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
-      // ดึงข้อมูล users (array) จาก localStorage
-      const users = JSON.parse(localStorage.getItem('users')) || [];
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-      // หา user ที่ตรงกับ email และ password
-      const matchedUser = users.find(user => user.email === email && user.password === password);
+        // บันทึกสถานะล็อกอินใน localStorage ถ้าต้องการเก็บ
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('loggedInUser', JSON.stringify({ uid: user.uid, email: user.email }));
 
-      if (!matchedUser) {
+        alert("เข้าสู่ระบบสำเร็จ!");
+        window.location.href = "index.html";  // เปลี่ยนเป็นหน้าหลักของคุณ
+      } catch (error) {
         errorMsg.textContent = "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
-        return;
+        console.error(error);
       }
-
-      // บันทึกสถานะการเข้าสู่ระบบและข้อมูลผู้ใช้ที่ล็อกอิน
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('loggedInUser', JSON.stringify(matchedUser));
-
-      alert("เข้าสู่ระบบสำเร็จ!");
-      window.location.href = "index.html";
     });
   </script>
 </body>
